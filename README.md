@@ -2,7 +2,7 @@
 Tools, PKGBUILD and others miscellanous stuff to make arch works on PineNote
 
 ## Initial Setup
-Initial debian -> arch conversion can be made using hrdl's method here:
+Initial debian -> arch conversion can be made using artoo's method here:
 https://github.com/hrdl-github/pinenote-arch/tree/main
 
 ## Kernel Installation
