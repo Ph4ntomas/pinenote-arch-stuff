@@ -10,7 +10,7 @@ _srcname=linux-${_commit}
 _kernelname=${pkgbase#linux}
 _desc="AArch64 multi-platform"
 pkgver=6.12.11
-pkgrel=1
+pkgrel=2
 arch=('aarch64')
 url="http://www.kernel.org/"
 license=('GPL2')
@@ -42,7 +42,7 @@ build() {
   unset LDFLAGS
   make ${MAKEFLAGS} Image Image.gz modules
   # Generate device tree blobs with symbols to support applying device tree overlays in U-Boot
-  make ${MAKEFLAGS} DTC_FLAGS="-@" dtbs
+  make ${MAKEFLAGS} DTC_FLAGS="-@" "rockchip/rk3566-pinenote-{v1.1,v1.2}.dtb"
 }
 
 _package() {
@@ -59,7 +59,7 @@ _package() {
 
   echo "Installing boot image and dtbs..."
   install -Dm644 arch/arm64/boot/Image{,.gz} -t "${pkgdir}/boot"
-  make INSTALL_DTBS_PATH="${pkgdir}/boot/dtbs" dtbs_install
+  install -Dm644 arch/arm64/boot/dts/rockchip/rk3566-pinenote-{v1.1,v1.2}.dtb -t "${pkgdir}/boot/dtbs/rockchip"
 
   echo "Installing modules..."
   make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 DEPMOD=/doesnt/exist modules_install
