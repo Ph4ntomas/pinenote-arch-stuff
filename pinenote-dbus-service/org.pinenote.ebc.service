@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=org.pinenote.ebc
+Exec=/usr/bin/pinenote_dbus_service
+User=root
+SystemdService=pinenote_dbus.service

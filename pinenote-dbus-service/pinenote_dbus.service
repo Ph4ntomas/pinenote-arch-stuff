@@ -1,0 +1,14 @@
+[Unit]
+Description=PineNote D-Bus Service
+After=dbus.service
+
+# Since pinenote_dbus_service does not register the org.pinenote name, we target org.pinenote.ebc explicitely
+
+[Service]
+Type=dbus
+BusName=org.pinenote.ebc
+ExecStart=/usr/bin/pinenote_dbus_service
+
+[Install]
+WantedBy=multi-user.target
+Alias=dbus-org.pinenote.ebc.service
