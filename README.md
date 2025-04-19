@@ -6,10 +6,11 @@ Initial debian -> arch conversion can be made using artoo's method here:
 https://github.com/hrdl-github/pinenote-arch/tree/main
 
 ## Kernel Installation
-[](/linux-pinenote) contains a PKGBUILD to build the kernel, as well as other necessary file
+### Linux Pinenote 6.12.11
+[linux-pinenote](./linux-pinenote) contains a PKGBUILD to build the kernel, as well as other necessary file
 to automate initramfs generation.
 
-I'd suggest setting up distcc to build it
+This kernel is built from the same sources the debian image built, and should behave the same.
 
 The packages it generate install the kernel in the following way:
 ```
@@ -18,6 +19,55 @@ The packages it generate install the kernel in the following way:
 /etc/mkinitcpio.d/linux-pinenote.preset # mkinitcpio preset, for initramfs generation
 /usr/lib/initcpio/6.12.11-1-pinenote # used to trigger mkinitcpio in pacman hooks
 /usr/lib/modules/6.12.11-1-pinenote/ # kernel modules
+```
+
+#### rockchip_ebc configuration
+Here is the default configuration from the debian image:
+
+```
+direct_mode=0 
+auto_refresh=1 
+refresh_threshold=60 
+split_area_limit=0 
+panel_reflection=1 
+prepare_prev_before_a2=0 
+dclk_select=0
+```
+
+On debian, there are set via modprobe, by writing the following file:
+/etc/modprobe.d/rockchip_ebc.conf
+```
+options rockchip_ebc direct_mode=0 auto_refresh=1 refresh_threshold=60 split_area_limit=0 panel_reflection=1 prepare_prev_before_a2=0 dclk_select=0
+```
+
+
+### Linux Pinenote - Hrdl's Pixel Scheduling 
+[linux-pinenote-pixelsched](./linux-pinenote-pixelsched) contains a newer revision of the graphic driver, written by hrdl.
+
+This package is build from their latest commit here:
+https://git.sr.ht/~hrdl/linux/tree/c88c6c96ed6dfaaa919a31c93f3d9d7e86a047a7
+
+Here is the package structure:
+```
+/boot/Image{,gz} # vmlinux image
+/boot/dtbs # Device tree blobs
+/etc/mkinitcpio.d/linux-pinenote-pixelsched.preset # mkinitcpio preset, for initramfs generation
+/usr/lib/initcpio/6.12.0-1-pinenote-pixelsched # used to trigger mkinitcpio in pacman hooks
+/usr/lib/modules/6.12.0-1-pinenote-pixelsched/ # kernel modules
+```
+
+#### rockchip_ebc configuration
+hrdl suggest the following parameter when using his implemetation:
+```
+use_neon=15 # use neon-based functions for blitting. 15 -> All neon backed features are enabled
+direct_mode=1 # compute waveforms in software (software LUT)
+early_cancellation=1 # allow cancelling ongoing A2 updates
+early_cancellation_addition=2 # number of additional frames to drive a pixel when cancelling it
+```
+
+The easiest way to set the configuration is to create or edit `/etc/modprobe.d/rockchip_ebc.conf` so that it contains the following:
+```
+options rockchip_ebc use_neon=15 direct_mode=1 early_cancellation=1 early_cancellation_addition=2
 ```
 
 ### Initramfs Configuration
@@ -32,6 +82,7 @@ Generate the initramfs with the correct modules:
 ```
 $ mkinitcpio -P
 ```
+
 
 ### Booting the kernel
 Edit `/boot/extlinux/extlinux.conf` so it properly load your newly installed kernel:
