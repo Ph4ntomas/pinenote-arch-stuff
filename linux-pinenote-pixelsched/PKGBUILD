@@ -1,0 +1,202 @@
+# / AArch64 for pinenote
+# Maintainer: Gabriel Cadet <phantomas@phantomas.xyz>
+#
+# FIXME: As it is, the package force a dependency on mkinitcpio, 
+# even tho other initramfs generators would work fine.
+
+buildarch=8
+
+pkgbase=linux-pinenote-pixelsched
+_commit=c88c6c96ed6dfaaa919a31c93f3d9d7e86a047a7
+_srcname=linux-${_commit}
+pkgdesc="Linux Kernel for Pinenote"
+pkgver=6.12.0.r254.gc88c6c9
+pkgrel=1
+arch=('aarch64')
+url="http://www.kernel.org/"
+license=(GPL-2.0-only)
+makedepends=(
+	bc 
+	kmod
+)
+options=('!strip')
+source=(
+    "linux-pinenote-${pkgver}-pixelsched.tar.gz::https://git.sr.ht/~hrdl/linux/archive/${_commit}.tar.gz"
+    'linux.preset'
+    config
+)
+sha256sums=(
+    'af45cfb19a658b7189892f87633b1779fcc33ff279d6d15d8e4d7db0feff0f33'
+    '4521b5fc8964affe10f14c5bfa3ca9d12011c986f1f07d9d150d0726308fb9a1'
+    '5d8eb0f458a70a2cdfa842bf37a77304afb824d037596d815d3679462523713a'
+)
+
+export KBUILD_BUILD_HOST="archlinuxarm"
+export KBUILD_BUILD_USER=$pkgbase
+export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
+
+prepare() {
+    cd ${_srcname}
+
+    echo "Setting version"
+    echo "-${pkgrel}" > localversion.10-pkgrel
+    echo "${pkgbase#linux}" > localversion.20-pkgname
+
+    echo "Setting config..."
+    cp ../config .config
+    make olddefconfig
+    diff -u ../config .config || :
+
+    make -s kernelrelease > version
+    echo "Prepared ${pkgbase} version $(<version)"
+}
+
+build() {
+    cd "${_srcname}"
+
+    make prepare
+
+    unset LDFLAGS
+    make ${MAKEFLAGS} Image Image.gz modules
+
+    echo "Building PineNote DTBs"
+    make ${MAKEFLAGS} DTC_FLAGS="-@" "rockchip/rk3566-pinenote-{v1.1,v1.2}.dtb"
+}
+
+_package() {
+    pkgdesc="The ${pkgdesc} and module - with hrdl's Pixel Scheduling"
+    #FIXME: change mkinitcpio dependency to initramfs instead.
+    depends=('coreutils' 'kmod' 'mkinitcpio>=0.7')
+    optdepends=(
+        'linux-firmware: firmware images needed for some devices'
+        'wireless-regdb: to set the correct wireless channels of your country'
+    )
+    provides=("linux=${pkgver}" "KSMBD-MODULE" "WIREGUARD-MODULE")
+    conflicts=('linux')
+    install=${pkgname}.install
+
+    cd $_srcname
+    local kernver="$(<version)"
+    local modulesdir="${pkgdir}/usr/lib/modules/$kernver"
+
+    echo "Installing boot image and dtbs..."
+    install -Dm644 arch/arm64/boot/Image{,.gz} -t "${pkgdir}/boot"
+    install -Dm644 arch/arm64/boot/dts/rockchip/rk3566-pinenote-{v1.1,v1.2}.dtb -t "${pkgdir}/boot/dtbs/rockchip"
+
+    echo "Installing modules..."
+    make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 DEPMOD=/doesnt/exist modules_install
+
+    # remove build link
+    rm "$modulesdir"/build
+
+    # sed expression for following substitutions
+    local _subst="
+    s|%PKGBASE%|${pkgbase}|g
+    s|%KERNVER%|${kernver}|g
+    "
+
+    # TODO: Remove once mkinitcpio is no longer a dependency
+    # install mkinitcpio preset file
+    sed "${_subst}" ../linux.preset |
+        install -Dm644 /dev/stdin "${pkgdir}/etc/mkinitcpio.d/${pkgbase}.preset"
+
+    # rather than use another hook (90-linux.hook) rely on mkinitcpio's 90-mkinitcpio-install.hook
+    # which avoids a double run of mkinitcpio that can occur
+    install -d "${pkgdir}/usr/lib/initcpio/"
+    echo "dummy file to trigger mkinitcpio to run" > "${pkgdir}/usr/lib/initcpio/$(<version)"
+}
+
+_package-headers() {
+    pkgdesc="Headers and scripts for building modules for the ${pkgdesc}"
+    provices=("linux-headers=${pkgver}")
+    conflicts=('linux-headers')
+
+    cd "${_srcname}"
+    local builddir="${pkgdir}/usr/lib/modules/$(<version)/build"
+
+    echo "Installing build files..."
+    install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
+        localversion.* version vmlinux
+    install -Dt "$builddir/kernel" -m644 kernel/Makefile
+    install -Dt "$builddir/arch/arm64" -m644 arch/arm64/Makefile
+    cp -t "$builddir" -a scripts
+
+    # add xfs and shmem for aufs building
+    mkdir -p "$builddir"/{fs/xfs,mm}
+
+    echo "Installing headers..."
+    cp -t "$builddir" -a include
+    cp -t "$builddir/arch/arm64" -a arch/arm64/include
+    install -Dt "$builddir/arch/arm64/kernel" -m644 arch/arm64/kernel/asm-offsets.s
+    mkdir -p "$builddir/arch/arm"
+    cp -t "$builddir/arch/arm" -a arch/arm/include
+
+    install -Dt "$builddir/drivers/md" -m644 drivers/md/*.h
+    install -Dt "$builddir/net/mac80211" -m644 net/mac80211/*.h
+
+    # https://bugs.archlinux.org/task/13146
+    install -Dt "$builddir/drivers/media/i2c" -m644 drivers/media/i2c/msp3400-driver.h
+
+    # https://bugs.archlinux.org/task/20402
+    install -Dt "$builddir/drivers/media/usb/dvb-usb" -m644 drivers/media/usb/dvb-usb/*.h
+    install -Dt "$builddir/drivers/media/dvb-frontends" -m644 drivers/media/dvb-frontends/*.h
+    install -Dt "$builddir/drivers/media/tuners" -m644 drivers/media/tuners/*.h
+
+    # https://bugs.archlinux.org/task/71392
+    install -Dt "$builddir/drivers/iio/common/hid-sensors" -m644 drivers/iio/common/hid-sensors/*.h
+
+    echo "Installing KConfig files..."
+    find . -name 'Kconfig*' -exec install -Dm644 {} "$builddir/{}" \;
+
+#    echo "Installing Rust files..."
+#    install -Dt "$builddir/rust" -m644 rust/*.rmeta
+#    install -Dt "$builddir/rust" rust/*.so
+
+    echo "Installing unstripped VDSO..."
+    make INSTALL_MOD_PATH="$pkgdir/usr" vdso_install \
+        link=  # Suppress build-id symlinks
+
+    echo "Removing unneeded architectures..."
+    local arch
+    for arch in "$builddir"/arch/*/; do
+        [[ $arch = */arm64/ || $arch == */arm/ ]] && continue
+        echo "Removing $(basename "$arch")"
+        rm -r "$arch"
+    done
+
+    echo "Removing documentation..."
+    rm -r "$builddir/Documentation"
+
+    echo "Removing broken symlinks..."
+    find -L "$builddir" -type l -printf 'Removing %P\n' -delete
+
+    echo "Removing loose objects..."
+    find "$builddir" -type f -name '*.o' -printf 'Removing %P\n' -delete
+
+    echo "Stripping build tools..."
+    local file
+    while read -rd '' file; do
+        case "$(file -bi "$file")" in
+            application/x-sharedlib\;*)      # Libraries (.so)
+                strip -v $STRIP_SHARED "$file" ;;
+            application/x-archive\;*)        # Libraries (.a)
+                strip -v $STRIP_STATIC "$file" ;;
+            application/x-executable\;*)     # Binaries
+                strip -v $STRIP_BINARIES "$file" ;;
+            application/x-pie-executable\;*) # Relocatable binaries
+                strip -v $STRIP_SHARED "$file" ;;
+        esac
+    done < <(find "$builddir" -type f -perm -u+x ! -name vmlinux -print0)
+
+    echo "Adding symlink..."
+    mkdir -p "$pkgdir/usr/src"
+    ln -sr "$builddir" "$pkgdir/usr/src/$pkgbase"
+}
+
+pkgname=("${pkgbase}" "${pkgbase}-headers")
+for _p in ${pkgname[@]}; do
+    eval "package_${_p}() {
+        $(declare -f "_package${_p#$pkgbase}")
+        _package${_p#${pkgbase}}
+    }"
+done

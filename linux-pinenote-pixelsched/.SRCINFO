@@ -1,0 +1,33 @@
+pkgbase = linux-pinenote-pixelsched
+	pkgdesc = Linux Kernel for Pinenote
+	pkgver = 6.12.0.r254.gc88c6c9
+	pkgrel = 1
+	url = http://www.kernel.org/
+	arch = aarch64
+	license = GPL-2.0-only
+	makedepends = bc
+	makedepends = kmod
+	options = !strip
+	source = linux-pinenote-6.12.0.r254.gc88c6c9-pixelsched.tar.gz::https://git.sr.ht/~hrdl/linux/archive/c88c6c96ed6dfaaa919a31c93f3d9d7e86a047a7.tar.gz
+	source = linux.preset
+	source = config
+	sha256sums = af45cfb19a658b7189892f87633b1779fcc33ff279d6d15d8e4d7db0feff0f33
+	sha256sums = 4521b5fc8964affe10f14c5bfa3ca9d12011c986f1f07d9d150d0726308fb9a1
+	sha256sums = 5d8eb0f458a70a2cdfa842bf37a77304afb824d037596d815d3679462523713a
+
+pkgname = linux-pinenote-pixelsched
+	pkgdesc = The Linux Kernel for Pinenote and module - with hrdl's Pixel Scheduling
+	install = linux-pinenote-pixelsched.install
+	depends = coreutils
+	depends = kmod
+	depends = mkinitcpio>=0.7
+	optdepends = linux-firmware: firmware images needed for some devices
+	optdepends = wireless-regdb: to set the correct wireless channels of your country
+	provides = linux=6.12.0.r254.gc88c6c9
+	provides = KSMBD-MODULE
+	provides = WIREGUARD-MODULE
+	conflicts = linux
+
+pkgname = linux-pinenote-pixelsched-headers
+	pkgdesc = Headers and scripts for building modules for the Linux Kernel for Pinenote
+	conflicts = linux-headers
