@@ -100,8 +100,8 @@ The easiest way to set the configuration is to create or edit `/etc/modprobe.d/r
 options rockchip_ebc dithering_method=2 default_hint=0x80 early_cancellation_addition=2 redraw_delay=200
 ```
 
-[!IMPORTANT]
-This revision of the graphic driver uses a custom waveform format, so you'll have to convert your waveform file.
+> [!IMPORTANT]
+> This revision of the graphic driver uses a custom waveform format, so you'll have to convert your waveform file.
 
 The conversion script can be found here:
 https://git.sr.ht/~hrdl/pinenote-shared/tree/f0e5c756ad4fcceb98b67a80d1d7d05ab7fe1c75/item/helpers/ebc_waveform_tools
