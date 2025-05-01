@@ -7,12 +7,12 @@
 buildarch=8
 
 pkgbase=linux-pinenote-hrdl
-_commit=bddeeb47679c8a871c95c557664b890c17a4679f
+_commit=81175570f08ffec94e7f7a55f2191218f4f99139
 _srcname=linux-${_commit}
 _pkgdesc_device="PineNote"
 _pkgdesc_base="Linux kernel"
 pkgdesc="${_pkgdesc_base} for ${_pkgdesc_device}"
-pkgver=v6.15.rc3.r329.gbddeeb4
+pkgver=v6.15.rc3.r340.g8117557
 pkgrel=1
 arch=('aarch64')
 url="http://www.kernel.org/"
@@ -28,7 +28,7 @@ source=(
     config
 )
 sha256sums=(
-    'e403181ab24f5e476319a4a36d171947f0e027e9204de1494b8f881595947fa4'
+    '5939354a80c122300e4066a2b241ef2721f05bca0f885841217ad7edafc263e6'
     '4521b5fc8964affe10f14c5bfa3ca9d12011c986f1f07d9d150d0726308fb9a1'
     'db045ac90906f0b7fd081786f4b4ee645b6d42124ce409afcaa237ee13f373ed'
 )
@@ -82,7 +82,8 @@ _package() {
     local modulesdir="${pkgdir}/usr/lib/modules/$kernver"
 
     echo "Installing boot image and dtbs..."
-    install -Dm644 arch/arm64/boot/Image{,.gz} -t "${pkgdir}/boot"
+    install -Dm644 arch/arm64/boot/Image -t "${pkgdir}/boot"
+    install -Dm644 arch/arm64/boot/Image.gz "${modulesdir}/vmlinuz"
     install -Dm644 arch/arm64/boot/dts/rockchip/rk3566-pinenote-{v1.1,v1.2}.dtb -t "${pkgdir}/boot/dtbs/rockchip"
 
     echo "Installing modules..."
