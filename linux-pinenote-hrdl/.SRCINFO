@@ -1,6 +1,6 @@
 pkgbase = linux-pinenote-hrdl
 	pkgdesc = Linux kernel for PineNote
-	pkgver = v6.15.rc3.r340.g8117557
+	pkgver = v6.15.rc3.r349.gb0e82d0
 	pkgrel = 1
 	url = http://www.kernel.org/
 	arch = aarch64
@@ -8,10 +8,10 @@ pkgbase = linux-pinenote-hrdl
 	makedepends = bc
 	makedepends = kmod
 	options = !strip
-	source = linux-pinenote-hrdl-v6.15.rc3.r340.g8117557.tar.gz::https://git.sr.ht/~hrdl/linux/archive/81175570f08ffec94e7f7a55f2191218f4f99139.tar.gz
+	source = linux-pinenote-hrdl-v6.15.rc3.r349.gb0e82d0.tar.gz::https://git.sr.ht/~hrdl/linux/archive/b0e82d0f7a25ffa9da40f5d1aa4218023dbfc14d.tar.gz
 	source = linux.preset
 	source = config
-	sha256sums = 5939354a80c122300e4066a2b241ef2721f05bca0f885841217ad7edafc263e6
+	sha256sums = d8232282e309c79f5d3d3122db9dc51d07b1d649854bce604dda0fda74e64c3a
 	sha256sums = 4521b5fc8964affe10f14c5bfa3ca9d12011c986f1f07d9d150d0726308fb9a1
 	sha256sums = db045ac90906f0b7fd081786f4b4ee645b6d42124ce409afcaa237ee13f373ed
 
@@ -23,12 +23,12 @@ pkgname = linux-pinenote-hrdl
 	depends = mkinitcpio>=0.7
 	optdepends = linux-firmware: firmware images needed for some devices
 	optdepends = wireless-regdb: to set the correct wireless channels of your country
-	provides = linux=v6.15.rc3.r340.g8117557
+	provides = linux=v6.15.rc3.r349.gb0e82d0
 	provides = KSMBD-MODULE
 	provides = WIREGUARD-MODULE
 	conflicts = linux
 
 pkgname = linux-pinenote-hrdl-headers
 	pkgdesc = Headers and scripts for building modules for the Linux kernel for PineNote
-	provides = linux-headers=v6.15.rc3.r340.g8117557
+	provides = linux-headers=v6.15.rc3.r349.gb0e82d0
 	conflicts = linux-headers
