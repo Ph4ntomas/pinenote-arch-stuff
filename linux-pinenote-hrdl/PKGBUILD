@@ -7,12 +7,12 @@
 buildarch=8
 
 pkgbase=linux-pinenote-hrdl
-_commit=b0e82d0f7a25ffa9da40f5d1aa4218023dbfc14d
+_commit=6d28b5612d331db8a7119079c7fcdfe59155e9dc
 _srcname=linux-${_commit}
 _pkgdesc_device="PineNote"
 _pkgdesc_base="Linux kernel"
 pkgdesc="${_pkgdesc_base} for ${_pkgdesc_device}"
-pkgver=v6.15.rc3.r349.gb0e82d0
+pkgver=v6.15.rc3.r351.g6d28b56
 pkgrel=1
 arch=('aarch64')
 url="http://www.kernel.org/"
@@ -28,7 +28,7 @@ source=(
     config
 )
 sha256sums=(
-    'd8232282e309c79f5d3d3122db9dc51d07b1d649854bce604dda0fda74e64c3a'
+    '065d0b38ebc706821b6cf259bd406045f03fa3a226c799bcae81df83b87a44c2'
     '4521b5fc8964affe10f14c5bfa3ca9d12011c986f1f07d9d150d0726308fb9a1'
     'db045ac90906f0b7fd081786f4b4ee645b6d42124ce409afcaa237ee13f373ed'
 )
