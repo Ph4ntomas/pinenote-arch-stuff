@@ -1,0 +1,50 @@
+# Maintainer phantomas <phantomas@phantomas.xyz>
+
+buildarch=8
+
+pkgname=firmware-pinenote-experimental
+pkgver=1
+pkgrel=1
+pkgdesc="brcmfmac43455-sdio firmware for PineNote, with CLM blob from RPi-Distro"
+url="https://gitlab.com/kernel-firmware/linux-firmware"
+arch=(any)
+license=(
+    GPL-2.0-only
+    custom
+)
+conflicts=(linux-firmware brcm-firmware-pinenote)
+source=(
+    "https://gitlab.com/kernel-firmware/linux-firmware/-/raw/b054bd2b392904fa5db9c19215576bdaeb41ddd8/brcm/brcmfmac43455-sdio.AW-CM256SM.txt"
+    "https://gitlab.com/kernel-firmware/linux-firmware/-/raw/b054bd2b392904fa5db9c19215576bdaeb41ddd8/cypress/cyfmac43455-sdio.bin"
+    "https://gitlab.com/kernel-firmware/linux-firmware/-/raw/b054bd2b392904fa5db9c19215576bdaeb41ddd8/LICENCE.cypress"
+    "https://gitlab.com/kernel-firmware/linux-firmware/-/raw/b054bd2b392904fa5db9c19215576bdaeb41ddd8/GPL-2"
+
+    "https://github.com/RPi-Distro/firmware-nonfree/raw/7cf2f1bca39a5efea023e834d3b4c6b00af3c5ec/debian/config/brcm80211/cypress/cyfmac43455-sdio.clm_blob"
+
+    "WHENCE"
+)
+
+b2sums=(
+    'fb5bd566d7028fa3cf3d3057992716368734bcde83a87db86049ce8c6578bdaba7b0ba68ddf6a74c3057b8bee09b031b2e621df1f6c7e4e502522e29dcbe7582'
+    '82ae91182661d34694b5c916b83f5db9bc8b737c67ff99a1081b549bcc5d3d64cb0b7f288750405b468bbe8c76d23be65e95837114a3e1af1e03b1ad73dc0c6c'
+    '39cfe7678bb771de4672d8a8ac8b24142645ab93efef2ac3bac832716de924a264c98490d4f2a9d3c9c4d9f060f8d727da3836ab745930a224076390b171adf8'
+    '1e1e108a77d8676eb68467cdfbf95684f0bad991bfcc24e7bd3d1eec58d746f14d20798c3bcf64e9bdd1ff4a9c5ec02ccb4c06331bcf251a9d1d0f28b6875296'
+
+    'a6a1cf42fb476e5f3bfc5b1bba1ad34fa329ec197a65f57adfe9fa3a16453130f60e1761edc22c3f2079bf8b920e6929bdc4cce51bfd092470f6be286376754c'
+
+    '5c4e3fe331860678bbe7f65efdc41fcc99e39f38f60cd40086ea399c3003159ae1976355452c12cf3426bb6fd784ddcef508977ab62a4595b3a84a23386382af'
+)
+
+package() {
+    provides=("linux-firmware")
+
+    install -Dm644 cyfmac43455-sdio.{bin,clm_blob} -t "${pkgdir}/usr/lib/firmware/cypress"
+    install -Dm644 brcmfmac43455-sdio.AW-CM256SM.txt -t "${pkgdir}/usr/lib/firmware/brcm"
+    install -Dm644 LICENCE.cypress "${pkgdir}/usr/share/licenses/${pkgname}/LICENCE.cypress"
+    install -Dm644 GPL-2 "${pkgdir}/usr/share/licenses/${pkgname}/LICENCE.cypress"
+    install -Dm644 WHENCE "${pkgdir}/usr/share/licenses/${pkgname}/WHENCE"
+
+    ln -s ../cypress/cyfmac43455-sdio.bin "${pkgdir}/usr/lib/firmware/brcm/brcmfmac43455-sdio.pine64,pinenote-v1.2.bin"
+    ln -s ../cypress/cyfmac43455-sdio.clm_blob "${pkgdir}/usr/lib/firmware/brcm/brcmfmac43455-sdio.clm_blob"
+    ln -s brcmfmac43455-sdio.AW-CM256SM.txt "${pkgdir}/usr/lib/firmware/brcm/brcmfmac43455-sdio.pine64,pinenote-v1.2.txt"
+}
